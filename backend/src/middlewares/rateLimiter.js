@@ -4,8 +4,10 @@ const { createClient } = require('redis');
 const logger = require('../utils/logger');
 
 let store;
+let redisClient;
+
 if (process.env.NODE_ENV === 'production') {
-  const redisClient = createClient({
+  redisClient = createClient({
     url: process.env.AUDIUM_REDIS_URL || 'redis://localhost:6379'
   });
 

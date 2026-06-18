@@ -95,6 +95,19 @@ const Login = () => {
           >
             {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
           </button>
+          
+          <div style={{ marginTop: '1rem' }}>
+            <button 
+              type="button" 
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.9rem', transition: 'color 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
+              onMouseOver={(e) => e.target.style.color = 'var(--text-main)'}
+              onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}
+              onClick={() => navigate('/')}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              Back to Home
+            </button>
+          </div>
         </div>
       </div>
     </div>
