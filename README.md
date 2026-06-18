@@ -61,3 +61,17 @@ To bridge the secure Vercel frontend with your local hardware GPU, we use **ngro
    ```
 
 Open `http://localhost:5173` and start cloning voices!
+
+## 🚀 Deployment Checklist
+
+Before deploying Audium to Render and Vercel, you **must** set the following environment variables in their respective dashboards:
+
+### Backend (Render Environment Variables)
+- `AUDIUM_JWT_SECRET` — A secure, random string used to cryptographically sign user session tokens.
+- `AUDIUM_MONGODB_URI` — The connection string to your MongoDB Atlas cluster (e.g., `mongodb+srv://...`).
+- `WORKER_SECRET` — A shared secret string that matches the secret configured on your local ML Worker for secure registration.
+
+*(Note: After the Render backend wakes from sleep, restart the local ML worker to trigger automatic re-registration.)*
+
+### Frontend (Vercel Environment Variables)
+- `VITE_AUDIUM_API_BASE_URL` — The full URL of your deployed Render backend (e.g., `https://audium-backend.onrender.com/api`).

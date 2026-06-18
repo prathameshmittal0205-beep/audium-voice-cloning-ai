@@ -13,7 +13,7 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { userId: user._id, email: user.email },
-    process.env.AUDIUM_JWT_SECRET || 'secret',
+    process.env.AUDIUM_JWT_SECRET,
     { expiresIn: '15m' } // 15 minutes access token
   );
   

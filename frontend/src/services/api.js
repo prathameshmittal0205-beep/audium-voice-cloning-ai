@@ -1,4 +1,10 @@
-const BASE_URL = import.meta.env.VITE_AUDIUM_API_BASE_URL || "/api";
+const BASE_URL = import.meta.env.VITE_AUDIUM_API_BASE_URL;
+if (!BASE_URL) {
+  throw new Error(
+    "[Audium] VITE_AUDIUM_API_BASE_URL is not set. " +
+    "Add it to your .env or Vercel environment variables."
+  );
+}
 
 let isRefreshing = false;
 let refreshSubscribers = [];
@@ -10,6 +16,11 @@ const subscribeTokenRefresh = (cb) => {
 const onRefreshed = (token) => {
   refreshSubscribers.map(cb => cb(token));
   refreshSubscribers = [];
+};
+
+const onRefreshFailed = () => {
+  refreshSubscribers = [];
+  isRefreshing = false;
 };
 
 const doFetch = async (endpoint, options) => {
@@ -49,7 +60,7 @@ const doFetch = async (endpoint, options) => {
         isRefreshing = false;
         onRefreshed(data.token);
       } catch (e) {
-        isRefreshing = false;
+        onRefreshFailed();
         // Trigger logout event conceptually, here we just clear tokens
         localStorage.removeItem('audium_token');
         localStorage.removeItem('audium_refresh_token');

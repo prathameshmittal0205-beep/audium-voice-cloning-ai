@@ -8,6 +8,27 @@ const connectDB = require('./config/db');
 
 dotenv.config({ path: '../.env' });
 
+const REQUIRED_ENV_VARS = [
+  'AUDIUM_JWT_SECRET',
+  'AUDIUM_MONGODB_URI',
+  'WORKER_SECRET'
+];
+
+if (process.env.NODE_ENV !== 'test') {
+  for (const key of REQUIRED_ENV_VARS) {
+    if (!process.env[key]) {
+      console.error(
+        JSON.stringify({
+          service: "audium-api",
+          level: "FATAL",
+          message: `Required environment variable ${key} is not set. Exiting.`
+        })
+      );
+      process.exit(1);
+    }
+  }
+}
+
 const app = express();
 
 // Connect to MongoDB unless in test mode
@@ -43,6 +64,7 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/training', require('./routes/training'));
 app.use('/api/tts', require('./routes/tts'));
 app.use('/api/model', require('./routes/model'));
+app.use('/internal', globalLimiter, require('./routes/internal'));
 
 app.get('/api/health', (req, res) => {
   // Advanced health check logic to be added

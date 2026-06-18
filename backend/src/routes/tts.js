@@ -1,21 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleAuth } = require('google-auth-library');
 const { Storage } = require('@google-cloud/storage');
+const mlProvider = require('../services/mlProvider');
 const Generation = require('../models/Generation');
 const Voice = require('../models/Voice');
 const authenticateToken = require('../middlewares/auth');
 const { ttsLimiter } = require('../middlewares/rateLimiter');
 
-const projectId = process.env.AUDIUM_VERTEX_PROJECT_ID;
-const location = process.env.AUDIUM_VERTEX_LOCATION || 'us-central1';
-const endpointId = process.env.AUDIUM_VERTEX_ENDPOINT_ID;
 const bucketGenerated = process.env.AUDIUM_BUCKET_GENERATED || 'audium-generated';
-const bucketModels = process.env.AUDIUM_BUCKET_MODELS || 'audium-models';
 
-const auth = new GoogleAuth({
-  scopes: 'https://www.googleapis.com/auth/cloud-platform'
-});
 const storage = new Storage();
 const bucket = storage.bucket(bucketGenerated);
 
@@ -38,46 +31,16 @@ router.post('/generate', authenticateToken, ttsLimiter, async (req, res) => {
       return res.status(400).json({ error: 'AUDIUM_MODEL_NOT_READY' });
     }
 
-    const client = await auth.getClient();
-    const tokenResponse = await client.getAccessToken();
-
-    const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/endpoints/${endpointId}:predict`;
-
-    const payload = {
-      instances: [
-        {
-          text,
-          voiceId: voiceId,
-          userId: userId, // Ensure endpoint uses right user model
-          language: "en"
-        }
-      ]
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${tokenResponse.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      req.log.error({ err: errText }, 'Inference pipeline failure');
-      return res.status(500).json({ error: 'Inference pipeline failure' });
+    let audioBuffer;
+    try {
+      const result = await mlProvider.generateSpeech({ text, voiceId, userId });
+      audioBuffer = result.audioBuffer;
+    } catch (error) {
+      if (error.name === 'OfflineError') {
+        return res.status(503).json({ status: 'offline', message: error.message });
+      }
+      throw error;
     }
-
-    const data = await response.json();
-    const base64Audio = data.predictions && data.predictions[0] && data.predictions[0].audio_base64;
-    
-    if (!base64Audio) {
-      return res.status(500).json({ error: 'Invalid response from inference endpoint' });
-    }
-
-    // Decode base64 to buffer
-    const audioBuffer = Buffer.from(base64Audio, 'base64');
     
     // Save to Mongo
     const generation = new Generation({
