@@ -1,5 +1,11 @@
 # Audium Voice Cloning AI - Architecture & Ngrok Integration
 
+[![Status: Deployed](https://img.shields.io/badge/Status-Deployed-success?style=for-the-badge)](https://audium.vercel.app)
+[![Backend: Render](https://img.shields.io/badge/Backend-Render_API-blue?style=for-the-badge)](https://audium-api.onrender.com/api/health)
+
+**Live Demo:** [https://audium.vercel.app](https://audium.vercel.app)
+**Backend Health:** [https://audium-api.onrender.com/api/health](https://audium-api.onrender.com/api/health)
+
 Welcome to the Audium Voice Cloning AI project. This document explains the hybrid local/cloud architecture of the application and details exactly how the frontend communicates with your local PyTorch ML environment using **ngrok**.
 
 ## 🏗️ The Problem
