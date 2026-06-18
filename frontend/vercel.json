@@ -1,0 +1,10 @@
+{
+  "build": {
+    "env": {
+      "VITE_XTTS_API_URL": "https://postlicentiate-flecklessly-mason.ngrok-free.dev"
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

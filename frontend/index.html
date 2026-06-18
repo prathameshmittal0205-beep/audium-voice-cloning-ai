@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Audium - Voice Cloning AI Accessibility Application" />
+    <title>Audium | Give Your Voice Life</title>
+  </head>
+  <body>
+    <!-- Global SVG filters -->
+    <svg width="0" height="0" style="position: absolute; pointer-events: none;">
+      <filter id="remove-white-bg" color-interpolation-filters="sRGB">
+        <!-- 1. Map Inverse Red to Alpha -->
+        <feColorMatrix in="SourceGraphic" type="matrix" values="
+          0 0 0 0 0
+          0 0 0 0 0
+          0 0 0 0 0
+          -1 0 0 0 1" result="raw_mask" />
+        <!-- 2. Threshold mask to kill JPEG noise and keep logo opaque -->
+        <feComponentTransfer in="raw_mask" result="clean_mask">
+          <feFuncA type="linear" slope="2" intercept="-0.1" />
+        </feComponentTransfer>
+        <!-- 3. Multiply original RGB by new Alpha for valid composition -->
+        <feComposite in="SourceGraphic" in2="clean_mask" operator="in" />
+      </filter>
+    </svg>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

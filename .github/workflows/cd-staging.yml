@@ -1,0 +1,32 @@
+name: CD Staging
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}'
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}'
+
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build & Push Images
+        run: |
+          # Build process goes here
+          echo "Building staging images"
+
+      - name: Deploy to Cloud Run (Staging)
+        run: |
+          gcloud run deploy staging-audium-backend --image gcr.io/project/staging-backend --region us-central1

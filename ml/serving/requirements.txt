@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+google-cloud-storage
+torch
+torchaudio
+TTS
+python-json-logger
+pydantic
