@@ -1,10 +1,4 @@
-const BASE_URL = import.meta.env.VITE_AUDIUM_API_BASE_URL;
-if (!BASE_URL) {
-  throw new Error(
-    "[Audium] VITE_AUDIUM_API_BASE_URL is not set. " +
-    "Add it to your .env or Vercel environment variables."
-  );
-}
+const BASE_URL = import.meta.env.VITE_AUDIUM_API_BASE_URL || '/api';
 
 let isRefreshing = false;
 let refreshSubscribers = [];

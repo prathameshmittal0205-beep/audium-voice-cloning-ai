@@ -1,6 +1,6 @@
 import { upload } from '@vercel/blob/client';
 
-const API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL || '/api';
 
 const fetchWithAuth = async (endpoint, options = {}) => {
   const token = localStorage.getItem('audium_token');
