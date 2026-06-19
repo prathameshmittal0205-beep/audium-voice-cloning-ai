@@ -24,7 +24,7 @@ function isValidWorkerUrl(url) {
     if (!allowedProtocols.includes(parsed.protocol)) return false;
     if (blockedHosts.some(h => parsed.hostname.includes(h))) return false;
     // For this project: only accept ngrok or known tunnel domains
-    const allowedDomains = ['.ngrok.io', '.ngrok-free.app', '.ngrok.app'];
+    const allowedDomains = ['.ngrok.io', '.ngrok-free.app', '.ngrok.app', '.ngrok-free.dev'];
     if (!allowedDomains.some(d => parsed.hostname.endsWith(d))) return false;
     return true;
   } catch {
