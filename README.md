@@ -1,10 +1,10 @@
 # Audium Voice Cloning AI - Architecture & Ngrok Integration
 
 [![Status: Deployed](https://img.shields.io/badge/Status-Deployed-success?style=for-the-badge)](https://audium.vercel.app)
-[![Backend: Render](https://img.shields.io/badge/Backend-Render_API-blue?style=for-the-badge)](https://audium-api.onrender.com/api/health)
+[![Backend: Vercel](https://img.shields.io/badge/Backend-Vercel_Functions-blue?style=for-the-badge)](https://audium.vercel.app/api/health)
 
 **Live Demo:** [https://audium.vercel.app](https://audium.vercel.app)
-**Backend Health:** [https://audium-api.onrender.com/api/health](https://audium-api.onrender.com/api/health)
+**Backend Health:** [https://audium.vercel.app/api/health](https://audium.vercel.app/api/health)
 
 Welcome to the Audium Voice Cloning AI project. This document explains the hybrid local/cloud architecture of the application and details exactly how the frontend communicates with your local PyTorch ML environment using **ngrok**.
 
@@ -45,23 +45,22 @@ To bridge the secure Vercel frontend with your local hardware GPU, we use **ngro
 
 1. **Start the ML Backend**
    ```powershell
-   cd d:\Projects\audium-ml-backend
+   cd ml/worker
    .\venv\Scripts\activate
-   uvicorn server:app --host 0.0.0.0 --port 8000
+   uvicorn app:app --host 0.0.0.0 --port 8001
    ```
 
 2. **Start the Ngrok Tunnel** (in a new terminal)
    ```powershell
-   cd d:\Projects\audium-ml-backend
-   ngrok http 8000
+   ngrok http 8001
    ```
    *(Copy the generated https URL)*
 
 3. **Configure & Start the Frontend** (in a new terminal)
    ```powershell
-   cd d:\Projects\audium_voice_cloning_ai\frontend
+   cd frontend
    ```
-   - Make sure your `.env.local` contains: `VITE_XTTS_API_URL=<your-new-ngrok-url>`
+   - Make sure your `.env.local` contains: `VITE_AUDIUM_API_BASE_URL=/api`
    ```powershell
    npm run dev
    ```
@@ -70,14 +69,13 @@ Open `http://localhost:5173` and start cloning voices!
 
 ## 🚀 Deployment Checklist
 
-Before deploying Audium to Render and Vercel, you **must** set the following environment variables in their respective dashboards:
+Before deploying Audium to Vercel, you **must** set the following environment variables in your Vercel project dashboard:
 
-### Backend (Render Environment Variables)
+### Vercel Environment Variables
+- `POSTGRES_URL` — Connection string for Vercel Postgres.
+- `BLOB_READ_WRITE_TOKEN` — Token for Vercel Blob storage.
 - `AUDIUM_JWT_SECRET` — A secure, random string used to cryptographically sign user session tokens.
-- `AUDIUM_MONGODB_URI` — The connection string to your MongoDB Atlas cluster (e.g., `mongodb+srv://...`).
 - `WORKER_SECRET` — A shared secret string that matches the secret configured on your local ML Worker for secure registration.
 
-*(Note: After the Render backend wakes from sleep, restart the local ML worker to trigger automatic re-registration.)*
+*(Note: Ensure your local ML worker continues to send heartbeats, as Vercel Functions are serverless and stateless.)*
 
-### Frontend (Vercel Environment Variables)
-- `VITE_AUDIUM_API_BASE_URL` — The full URL of your deployed Render backend (e.g., `https://audium-backend.onrender.com/api`).
