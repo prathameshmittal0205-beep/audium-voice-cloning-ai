@@ -17,6 +17,10 @@
       "destination": "/backend/api/index.js"
     },
     {
+      "source": "/internal/(.*)",
+      "destination": "/backend/api/index.js"
+    },
+    {
       "source": "/((?!api).*)",
       "destination": "/frontend/dist/index.html"
     }
