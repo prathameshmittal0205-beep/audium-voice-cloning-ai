@@ -9,8 +9,9 @@ const { connectDB } = require('./config/db');
 dotenv.config({ path: '../.env' });
 
 const REQUIRED_ENV_VARS = [
+  'POSTGRES_URL',
+  'BLOB_READ_WRITE_TOKEN',
   'AUDIUM_JWT_SECRET',
-  'AUDIUM_MONGODB_URI',
   'WORKER_SECRET'
 ];
 
@@ -31,7 +32,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 const app = express();
 
-// Connect to MongoDB unless in test mode
+// Connect to Postgres unless in test mode
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
 }

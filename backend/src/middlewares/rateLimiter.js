@@ -5,17 +5,20 @@ const logger = require('../utils/logger');
 // For high-traffic production, upgrade to Vercel KV-backed store.
 
 const createRateLimiter = ({ windowMs, max, keyGenerator, message, name }) => {
-  return rateLimit({
+  const options = {
     windowMs,
     max,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: keyGenerator || ((req) => req.ip),
     handler: (req, res, next, options) => {
       logger.warn({ traceId: req.id, ip: req.ip, userId: req.user?.userId, limit: name }, 'Rate limit exceeded');
       res.status(429).json({ error: message || 'Too many requests, please try again later.' });
     }
-  });
+  };
+  if (keyGenerator) {
+    options.keyGenerator = keyGenerator;
+  }
+  return rateLimit(options);
 };
 
 const globalLimiter = createRateLimiter({
@@ -36,7 +39,10 @@ const uploadLimiter = createRateLimiter({
   name: 'upload',
   windowMs: 60 * 60 * 1000,
   max: 10,
-  keyGenerator: (req) => req.user?.userId || req.ip,
+  keyGenerator: (req, res) => {
+    if (req.user?.userId) return req.user.userId;
+    return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  },
   message: 'Upload limit exceeded. You can upload 10 files per hour.'
 });
 
@@ -44,7 +50,10 @@ const trainingLimiter = createRateLimiter({
   name: 'training',
   windowMs: 24 * 60 * 60 * 1000,
   max: 2,
-  keyGenerator: (req) => req.user?.userId || req.ip,
+  keyGenerator: (req, res) => {
+    if (req.user?.userId) return req.user.userId;
+    return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  },
   message: 'Training limit exceeded. You can start 2 training jobs per 24 hours.'
 });
 
@@ -52,7 +61,10 @@ const ttsLimiter = createRateLimiter({
   name: 'tts',
   windowMs: 60 * 60 * 1000,
   max: 20,
-  keyGenerator: (req) => req.user?.userId || req.ip,
+  keyGenerator: (req, res) => {
+    if (req.user?.userId) return req.user.userId;
+    return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  },
   message: 'TTS generation limit exceeded. You can generate 20 clips per hour.'
 });
 
