@@ -1,24 +1,8 @@
 const rateLimit = require('express-rate-limit');
-const { RedisStore } = require('rate-limit-redis');
-const { createClient } = require('redis');
 const logger = require('../utils/logger');
 
-let store;
-let redisClient;
-
-if (process.env.NODE_ENV === 'production') {
-  redisClient = createClient({
-    url: process.env.AUDIUM_REDIS_URL || 'redis://localhost:6379'
-  });
-
-  redisClient.on('error', (err) => logger.error({ err }, 'Redis Client Error'));
-  redisClient.connect().catch(err => logger.error({ err }, 'Redis connect failed'));
-  
-  store = new RedisStore({
-    sendCommand: (...args) => redisClient.sendCommand(args),
-    prefix: 'rl:'
-  });
-}
+// MemoryStore is safe on Vercel — single instance per cold start.
+// For high-traffic production, upgrade to Vercel KV-backed store.
 
 const createRateLimiter = ({ windowMs, max, keyGenerator, message, name }) => {
   return rateLimit({
@@ -26,7 +10,6 @@ const createRateLimiter = ({ windowMs, max, keyGenerator, message, name }) => {
     max,
     standardHeaders: true,
     legacyHeaders: false,
-    store: store ? store : undefined,
     keyGenerator: keyGenerator || ((req) => req.ip),
     handler: (req, res, next, options) => {
       logger.warn({ traceId: req.id, ip: req.ip, userId: req.user?.userId, limit: name }, 'Rate limit exceeded');
@@ -78,6 +61,5 @@ module.exports = {
   authLimiter,
   uploadLimiter,
   trainingLimiter,
-  ttsLimiter,
-  redisClient
+  ttsLimiter
 };
