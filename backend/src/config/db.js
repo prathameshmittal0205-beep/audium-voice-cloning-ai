@@ -1,42 +1,29 @@
-const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const { sql } = require('@vercel/postgres');
 
-const connectDB = async () => {
-  const uri = process.env.AUDIUM_MONGODB_URI;
-  if (!uri) {
+async function connectDB() {
+  if (!process.env.POSTGRES_URL) {
     console.error(JSON.stringify({
-      service: "audium-db",
-      level: "FATAL",
-      message: "AUDIUM_MONGODB_URI is not set. Cannot start Audium."
+      service: 'audium-db',
+      level: 'FATAL',
+      message: 'POSTGRES_URL is not set. Exiting.'
     }));
-    process.exit(1);     // fail fast — do not start without DB
+    process.exit(1);
   }
-
-  let retries = 5;
-  while (retries > 0) {
-    try {
-      await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 5000,
-        bufferCommands: false  // disable Mongoose buffering — fail fast
-      });
-      console.log(JSON.stringify({
-        service: "audium-db",
-        level: "INFO",
-        message: "Audium MongoDB connected."
-      }));
-      return;
-    } catch (err) {
-      retries--;
-      console.error(JSON.stringify({
-        service: "audium-db",
-        level: "ERROR",
-        message: err.message,
-        retriesLeft: retries
-      }));
-      if (retries === 0) process.exit(1);
-      await new Promise(r => setTimeout(r, 3000));
-    }
+  try {
+    await sql`SELECT 1`;
+    console.log(JSON.stringify({
+      service: 'audium-db',
+      level: 'INFO',
+      message: 'Audium Postgres connected.'
+    }));
+  } catch (err) {
+    console.error(JSON.stringify({
+      service: 'audium-db',
+      level: 'FATAL',
+      message: err.message
+    }));
+    process.exit(1);
   }
-};
+}
 
-module.exports = connectDB;
+module.exports = { connectDB, sql };

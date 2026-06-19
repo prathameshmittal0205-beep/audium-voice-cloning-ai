@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Storage } = require('@google-cloud/storage');
 const mlProvider = require('../services/mlProvider');
-const Generation = require('../models/Generation');
-const Voice = require('../models/Voice');
+const dbService = require('../services/dbService');
 const authenticateToken = require('../middlewares/auth');
 const { ttsLimiter } = require('../middlewares/rateLimiter');
 
@@ -26,7 +25,7 @@ router.post('/generate', authenticateToken, ttsLimiter, async (req, res) => {
 
     // Strict Ownership Check (prevent cross-user access)
     // Verify model readiness via DB (O(1) low-latency cache) instead of GCS
-    const voiceRecord = await Voice.findOne({ voiceId });
+    const voiceRecord = await dbService.findVoiceByVoiceId(voiceId);
     if (!voiceRecord || !voiceRecord.isReady) {
       return res.status(400).json({ error: 'AUDIUM_MODEL_NOT_READY' });
     }
@@ -42,25 +41,23 @@ router.post('/generate', authenticateToken, ttsLimiter, async (req, res) => {
       throw error;
     }
     
-    // Save to Mongo
-    const generation = new Generation({
+    // Save to DB
+    const generation = await dbService.createGeneration({
       userId,
       voiceId,
       text,
-      audioGcsPath: '' // temp
+      audioBlobUrl: '' // temp
     });
-    await generation.save();
 
-    const generationId = generation._id.toString();
+    const generationId = generation._id;
     const gcsPath = `${userId}/${voiceId}/${generationId}.wav`;
     
     // Upload buffer to GCS
     const file = bucket.file(gcsPath);
     await file.save(audioBuffer, { contentType: 'audio/wav' });
 
-    // Update mongo with real path
-    generation.audioGcsPath = `gs://${bucketGenerated}/${gcsPath}`;
-    await generation.save();
+    // Update DB with real path
+    await dbService.updateGenerationAudioUrl(generationId, `gs://${bucketGenerated}/${gcsPath}`);
 
     // Generate ephemeral signed URL (15 mins)
     const [urlSigned] = await file.getSignedUrl({
@@ -84,19 +81,16 @@ router.get('/history', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
 
-    const total = await Generation.countDocuments({ userId });
-    const records = await Generation.find({ userId })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const { records, total } = await dbService.getGenerationsByUser(userId, page, limit);
 
     // Regenerate signed URLs dynamically
     const generations = await Promise.all(records.map(async (record) => {
       // Parse gs:// bucket and path
       // Expected format: gs://audium-generated/...
-      const pathParts = record.audioGcsPath.replace('gs://', '').split('/');
+      const audioUrl = record.audioBlobUrl || '';
+      const pathParts = audioUrl.replace('gs://', '').split('/');
+      if (pathParts.length < 2) return null;
       const bName = pathParts[0]; // audium-generated
       const objectPath = pathParts.slice(1).join('/');
 
@@ -122,7 +116,7 @@ router.get('/history', authenticateToken, async (req, res) => {
     }));
 
     res.status(200).json({
-      generations,
+      generations: generations.filter(Boolean),
       total,
       page,
       limit

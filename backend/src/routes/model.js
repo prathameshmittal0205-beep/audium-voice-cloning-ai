@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Voice = require('../models/Voice');
+const dbService = require('../services/dbService');
 const authenticateToken = require('../middlewares/auth');
 
 router.post('/deploy', authenticateToken, async (req, res) => {
@@ -10,7 +10,7 @@ router.post('/deploy', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'voiceId required' });
     }
     
-    const voice = await Voice.findOne({ voiceId, userId: req.user.userId });
+    const voice = await dbService.findVoiceByVoiceIdAndUserId(voiceId, req.user.userId);
     if (!voice) {
       return res.status(404).json({ error: 'Voice not found' });
     }
@@ -19,8 +19,7 @@ router.post('/deploy', authenticateToken, async (req, res) => {
     // the model is lazy-loaded by the serving container.
     // "Deployment" just means verifying readiness and marking it active.
     
-    voice.isReady = true;
-    await voice.save();
+    await dbService.updateVoiceReadinessByVoiceId(voiceId, true);
     
     res.status(200).json({ message: 'Model deployed successfully to shared serving infrastructure' });
   } catch (err) {

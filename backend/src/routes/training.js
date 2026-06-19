@@ -3,7 +3,7 @@ const router = express.Router();
 const mlProvider = require('../services/mlProvider');
 const authenticateToken = require('../middlewares/auth');
 const { trainingLimiter } = require('../middlewares/rateLimiter');
-const Voice = require('../models/Voice');
+const dbService = require('../services/dbService');
 
 router.post('/start', authenticateToken, trainingLimiter, async (req, res) => {
   try {
@@ -28,7 +28,7 @@ router.post('/start', authenticateToken, trainingLimiter, async (req, res) => {
     }
 
     // Persist voice state to DB
-    await Voice.create({
+    await dbService.createVoice({
       userId,
       voiceId,
       uploadId,
@@ -62,7 +62,7 @@ router.get('/status/:jobId', authenticateToken, async (req, res) => {
 
     if (mappedStatus === 'COMPLETED') {
       // Update global readiness cache in DB
-      await Voice.findOneAndUpdate({ jobId }, { isReady: true });
+      await dbService.updateVoiceReadinessByJobId(jobId, true);
     }
 
     res.status(200).json({

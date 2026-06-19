@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const pinoHttp = require('pino-http');
 const { randomUUID } = require('crypto');
 const logger = require('./utils/logger');
-const connectDB = require('./config/db');
+const { connectDB } = require('./config/db');
 
 dotenv.config({ path: '../.env' });
 
