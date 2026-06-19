@@ -12,7 +12,7 @@ const REQUIRED_ENV_VARS = [
   'POSTGRES_URL',
   'BLOB_READ_WRITE_TOKEN',
   'AUDIUM_JWT_SECRET',
-  'WORKER_SECRET'
+  'AUDIUM_WORKER_SECRET'
 ];
 
 if (process.env.NODE_ENV !== 'test') {

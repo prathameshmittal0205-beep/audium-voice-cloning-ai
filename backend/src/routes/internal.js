@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const workerRegistry = require('../services/workerRegistry');
 
-if (process.env.NODE_ENV === "production" && !process.env.WORKER_SECRET) {
-  throw new Error("WORKER_SECRET required in production");
+if (process.env.NODE_ENV === "production" && !process.env.AUDIUM_WORKER_SECRET) {
+  throw new Error("AUDIUM_WORKER_SECRET required in production");
 }
 
-const WORKER_SECRET = process.env.WORKER_SECRET || 'dev-secret';
+const WORKER_SECRET = process.env.AUDIUM_WORKER_SECRET || 'dev-secret';
 
 function isValidWorkerUrl(url) {
   try {
