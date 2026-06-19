@@ -73,8 +73,12 @@ app.get('/api/health', (req, res) => {
 
 if (require.main === module) {
   const PORT = process.env.PORT || 8080;
-  app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`Audium Backend listening on port ${PORT}`);
+  app.listen(PORT, () => {
+    console.log(JSON.stringify({
+      service: 'audium-api',
+      level: 'INFO',
+      message: `Audium running locally on port ${PORT}`
+    }));
   });
 }
 
