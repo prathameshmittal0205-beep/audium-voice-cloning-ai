@@ -1,73 +1,54 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const { Storage } = require('@google-cloud/storage');
 const { randomUUID } = require('crypto');
+const { handleUpload } = require('@vercel/blob/client');
 const authenticateToken = require('../middlewares/auth');
 const { uploadLimiter } = require('../middlewares/rateLimiter');
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50 MB
+router.post('/request-url', authenticateToken, uploadLimiter, async (req, res) => {
+  try {
+    const body = req.body;
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        return {
+          allowedContentTypes: ['audio/wav', 'audio/mpeg', 'audio/mp3', 'text/plain'],
+          tokenPayload: JSON.stringify({ userId: req.user.userId }),
+        };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        // Optional server-side handling when upload finishes
+      },
+    });
+    return res.status(200).json(jsonResponse);
+  } catch (error) {
+    req.log.error({ error }, 'Failed to generate Vercel Blob client token');
+    return res.status(400).json({ error: error.message });
   }
 });
 
-// Assuming application default credentials (ADC) or explicit keys if local
-const storage = new Storage();
-const bucketName = process.env.AUDIUM_BUCKET_DATA || 'audium-voice-data';
-const bucket = storage.bucket(bucketName);
-
-router.post('/', authenticateToken, uploadLimiter, upload.single('audio'), async (req, res) => {
+router.post('/complete', authenticateToken, uploadLimiter, async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'Missing audio file' });
-    }
+    const { audioBlobUrl, transcriptBlobUrl } = req.body;
     
-    // Check basic mime type
-    if (!req.file.mimetype.startsWith('audio/')) {
-      return res.status(400).json({ error: 'Invalid file format. Must be audio.' });
-    }
-
-    const transcript = req.body.transcript;
-    if (!transcript) {
-      return res.status(400).json({ error: 'Missing transcript' });
+    if (!audioBlobUrl || !transcriptBlobUrl) {
+      return res.status(400).json({ error: 'Missing blob URLs' });
     }
 
     const uploadId = randomUUID();
-    const userId = req.user.userId;
-
-    const audioGcsPath = `${userId}/${uploadId}/audio.wav`;
-    const transcriptGcsPath = `${userId}/${uploadId}/transcript.txt`;
-
-    const audioBlob = bucket.file(audioGcsPath);
-    const audioStream = audioBlob.createWriteStream({ resumable: false });
     
-    audioStream.on('error', (err) => {
-      req.log.error({ err }, 'Failed to upload audio to GCS');
-      return res.status(500).json({ error: 'Storage upload failed' });
+    // We don't save to the database here because Voice creation
+    // happens when the training is triggered via /api/training/start.
+    // The previous GCS logic just returned the URLs.
+
+    res.status(200).json({
+      uploadId,
+      audioGcsPath: audioBlobUrl, // Keep keys for frontend compatibility
+      transcriptGcsPath: transcriptBlobUrl
     });
-
-    audioStream.on('finish', async () => {
-      try {
-        const transcriptBlob = bucket.file(transcriptGcsPath);
-        await transcriptBlob.save(transcript);
-
-        res.status(200).json({
-          uploadId,
-          audioGcsPath: `gs://${bucketName}/${audioGcsPath}`,
-          transcriptGcsPath: `gs://${bucketName}/${transcriptGcsPath}`
-        });
-      } catch (err) {
-        req.log.error({ err }, 'Failed to upload transcript to GCS');
-        return res.status(500).json({ error: 'Storage upload failed' });
-      }
-    });
-
-    audioStream.end(req.file.buffer);
-
   } catch (err) {
-    req.log.error({ err }, 'Upload processing failed');
+    req.log.error({ err }, 'Upload complete processing failed');
     res.status(500).json({ error: 'Internal server error' });
   }
 });

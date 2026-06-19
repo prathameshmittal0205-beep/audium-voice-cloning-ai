@@ -1,3 +1,5 @@
+import { upload } from '@vercel/blob/client';
+
 const API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL || 'http://localhost:8080/api';
 
 const fetchWithAuth = async (endpoint, options = {}) => {
@@ -44,8 +46,36 @@ export const audiumApi = {
   register: (email, password) => 
     fetchWithAuth('/auth/register', { method: 'POST', body: { email, password } }),
     
-  uploadVoice: (formData) => 
-    fetchWithAuth('/upload', { method: 'POST', body: formData }),
+  uploadVoice: async (formData) => {
+    const audioFile = formData.get('audio');
+    const transcriptText = formData.get('transcript');
+    const transcriptFile = new File([transcriptText], 'transcript.txt', { type: 'text/plain' });
+
+    const token = localStorage.getItem('audium_token');
+    const requestInit = { headers: {} };
+    if (token) requestInit.headers['Authorization'] = `Bearer ${token}`;
+    const handleUploadUrl = `${API_BASE}/upload/request-url`;
+
+    const audioBlob = await upload(audioFile.name || 'audio.wav', audioFile, {
+      access: 'public',
+      handleUploadUrl,
+      requestInit
+    });
+
+    const transcriptBlob = await upload(transcriptFile.name, transcriptFile, {
+      access: 'public',
+      handleUploadUrl,
+      requestInit
+    });
+
+    return fetchWithAuth('/upload/complete', {
+      method: 'POST',
+      body: {
+        audioBlobUrl: audioBlob.url,
+        transcriptBlobUrl: transcriptBlob.url
+      }
+    });
+  },
     
   startTraining: (uploadId) => 
     fetchWithAuth('/training/start', { method: 'POST', body: { uploadId } }),
