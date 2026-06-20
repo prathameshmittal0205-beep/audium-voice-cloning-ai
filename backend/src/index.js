@@ -31,6 +31,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Connect to Postgres unless in test mode
 // connectDB() is removed because top-level async network calls in Vercel Serverless
