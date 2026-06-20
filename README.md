@@ -1,10 +1,10 @@
 # Audium Voice Cloning AI - Architecture & Ngrok Integration
 
-[![Status: Deployed](https://img.shields.io/badge/Status-Deployed-success?style=for-the-badge)](https://audium.vercel.app)
-[![Backend: Vercel](https://img.shields.io/badge/Backend-Vercel_Functions-blue?style=for-the-badge)](https://audium.vercel.app/api/health)
+[![Status: Deployed](https://img.shields.io/badge/Status-Deployed-success?style=for-the-badge)](https://audium-voice-cloning-ai.vercel.app)
+[![Backend: Vercel](https://img.shields.io/badge/Backend-Vercel_Functions-blue?style=for-the-badge)](https://audium-voice-cloning-ai.vercel.app/api/health)
 
-**Live Demo:** [https://audium.vercel.app](https://audium.vercel.app)
-**Backend Health:** [https://audium.vercel.app/api/health](https://audium.vercel.app/api/health)
+**Live Demo:** [https://audium-voice-cloning-ai.vercel.app](https://audium-voice-cloning-ai.vercel.app)
+**Backend Health:** [https://audium-voice-cloning-ai.vercel.app/api/health](https://audium-voice-cloning-ai.vercel.app/api/health)
 
 Welcome to the Audium Voice Cloning AI project. This document explains the hybrid local/cloud architecture of the application and details exactly how the frontend communicates with your local PyTorch ML environment using **ngrok**.
 
@@ -14,7 +14,7 @@ To run high-fidelity zero-shot voice cloning using models like `Coqui XTTS-v2`, 
 
 Conversely, the frontend UI is built with React/Vite, which is very cheap and easy to host on edge networks like Vercel. 
 
-However, if you host the frontend on Vercel (`https://audium-seven.vercel.app`) and run the backend PyTorch server on your local machine (`http://localhost:8000`), the browser will block them from talking to each other. Modern web security (Mixed Content policies and CORS) strictly prohibits an `https` cloud website from making direct API calls to your local `http://localhost` computer.
+However, if you host the frontend on Vercel (`https://audium-voice-cloning-ai.vercel.app`) and run the backend PyTorch server on your local machine (`http://localhost:8000`), the browser will block them from talking to each other. Modern web security (Mixed Content policies and CORS) strictly prohibits an `https` cloud website from making direct API calls to your local `http://localhost` computer.
 
 ## 🚀 The Ngrok Solution
 
