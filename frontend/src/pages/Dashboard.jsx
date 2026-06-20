@@ -132,10 +132,23 @@ const Dashboard = () => {
   useEffect(() => {
     let isMounted = true;
     let intervalId;
+    let pollCount = 0;
+    const MAX_POLLS = 60; // 10 minutes at 10s intervals
 
     if (activeJobId && isTraining) {
       intervalId = setInterval(async () => {
         try {
+          pollCount++;
+          if (pollCount >= MAX_POLLS) {
+            clearInterval(intervalId);
+            if (isMounted) {
+              setIsTraining(false);
+              setUploadState({ loading: false, error: 'Training timed out after 10 minutes. Please try again.', success: '' });
+              setTrainingLogs(prev => [...prev, { type: "WARN", text: "Training timed out." }]);
+            }
+            return;
+          }
+
           const statusRes = await audiumApi.getTrainingStatus(activeJobId);
           if (isMounted) {
             const progress = statusRes.inferredProgress || 0;
@@ -144,13 +157,13 @@ const Dashboard = () => {
             setTrainingProgress(progress);
             setTrainingLogs(prev => [...prev, { type: "PROCESS", text: `Training state: ${state}` }]);
             
-            if (state === 'JOB_STATE_SUCCEEDED') {
+            if (state === 'COMPLETED') {
               clearInterval(intervalId);
               setModelReady(true);
               setIsTraining(false);
               localStorage.setItem("audium_model_ready", "true");
               setTrainingLogs(prev => [...prev, { type: "SUCCESS", text: "Voice model saved. Ready for synthesis." }]);
-            } else if (state === 'JOB_STATE_FAILED' || state === 'JOB_STATE_CANCELLED') {
+            } else if (state === 'FAILED' || state === 'JOB_STATE_FAILED' || state === 'JOB_STATE_CANCELLED') {
               clearInterval(intervalId);
               setIsTraining(false);
               setUploadState({ loading: false, error: 'Training failed.', success: '' });
@@ -407,7 +420,28 @@ const Dashboard = () => {
                 {trainingLogs.length === 0 ? (
                   <span className="thinking-dots" style={{ color: 'var(--text-muted)' }}>Establishing secure ML container connection</span>
                 ) : (
-                  trainingLogs.map((logObj, i) => formatLog(logObj, i))
+                  <>
+                    {trainingLogs.map((logObj, i) => formatLog(logObj, i))}
+                    {modelReady && !isTraining && (
+                      <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }} className="animate-slide-up">
+                        <div style={{ color: 'var(--glow-cyan)', marginBottom: '1rem', fontWeight: 500, fontFamily: 'Sora' }}>
+                          ✨ Your voice profile is ready!
+                        </div>
+                        <button 
+                          type="button"
+                          className="btn btn-primary" 
+                          onClick={() => {
+                            const el = document.getElementById('generate-heading');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Optionally focus the textarea
+                            setTimeout(() => document.getElementById('tts-text')?.focus(), 500);
+                          }}
+                        >
+                          Start Synthesizing ↓
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
