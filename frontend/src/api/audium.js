@@ -76,8 +76,8 @@ export const audiumApi = {
     return response.json();
   },
     
-  startTraining: (uploadId) => 
-    fetchWithAuth('/training/start', { method: 'POST', body: { uploadId } }),
+  startTraining: (uploadId, audioUrl, transcriptUrl) => 
+    fetchWithAuth('/training/start', { method: 'POST', body: { uploadId, audioUrl, transcriptUrl } }),
     
   getTrainingStatus: (jobId) => 
     fetchWithAuth(`/training/status/${jobId}`),

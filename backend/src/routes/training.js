@@ -7,7 +7,7 @@ const dbService = require('../services/dbService');
 
 router.post('/start', authenticateToken, trainingLimiter, async (req, res) => {
   try {
-    const { uploadId } = req.body;
+    const { uploadId, audioUrl, transcriptUrl } = req.body;
     if (!uploadId) {
       return res.status(400).json({ error: 'Invalid uploadId' });
     }
@@ -17,7 +17,7 @@ router.post('/start', authenticateToken, trainingLimiter, async (req, res) => {
 
     let jobId, status;
     try {
-      const result = await mlProvider.startTraining({ uploadId, userId, voiceId, traceId: req.id });
+      const result = await mlProvider.startTraining({ uploadId, userId, voiceId, audioUrl, transcriptUrl, traceId: req.id });
       jobId = result.jobId;
       status = result.status;
     } catch (error) {

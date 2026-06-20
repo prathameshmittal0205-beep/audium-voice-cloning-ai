@@ -56,15 +56,16 @@ class LocalWorkerProvider {
     this.workerHealthCache = { status: 'offline', lastChecked: Date.now() };
   }
 
-  async startTraining({ uploadId, userId, voiceId, datasetUrl }) {
+  async startTraining({ uploadId, userId, voiceId, audioUrl, transcriptUrl }) {
     await this._checkHealth();
     const workerUrl = await workerRegistry.getWorkerUrl();
+    const jobId = require('crypto').randomUUID();
     
     try {
       const response = await fetch(`${workerUrl}/train`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId, userId, voiceId, datasetUrl: datasetUrl || '' })
+        body: JSON.stringify({ job_id: jobId, audio_url: audioUrl, voice_id: voiceId })
       });
 
       if (!response.ok) {
@@ -72,7 +73,7 @@ class LocalWorkerProvider {
       }
 
       const data = await response.json();
-      return { jobId: data.jobId, status: data.status };
+      return { jobId: data.job_id || data.jobId || jobId, status: data.status };
     } catch (err) {
       this._forceOffline();
       throw err;
@@ -124,7 +125,7 @@ class LocalWorkerProvider {
       const response = await fetch(`${workerUrl}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voiceId, userId })
+        body: JSON.stringify({ text, voice_id: voiceId, user_id: userId })
       });
 
       if (!response.ok) {

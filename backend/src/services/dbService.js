@@ -166,9 +166,19 @@ async function deleteGeneration(id, userId) {
   return rowCount;
 }
 
+async function updateVoiceModelUrl(jobId, modelUrl) {
+  const { rows } = await sql`
+    UPDATE audium_voices
+    SET is_ready = true, model_url = ${modelUrl}
+    WHERE job_id = ${jobId}
+    RETURNING id as "_id", user_id as "userId", voice_id as "voiceId", upload_id as "uploadId", job_id as "jobId", is_ready as "isReady", model_url as "modelUrl", created_at as "createdAt"
+  `;
+  return rows[0] || null;
+}
+
 module.exports = {
   createUser, findUserByEmail, findUserById,
   createSession, findSessionByToken, updateSessionRevoked, deleteSessionByToken, deleteAllUserSessions,
-  createVoice, findVoiceByVoiceId, findVoiceByVoiceIdAndUserId, updateVoiceReadinessByJobId, updateVoiceReadinessByVoiceId, getVoicesByUser,
+  createVoice, findVoiceByVoiceId, findVoiceByVoiceIdAndUserId, updateVoiceReadinessByJobId, updateVoiceReadinessByVoiceId, getVoicesByUser, updateVoiceModelUrl,
   createGeneration, updateGenerationAudioUrl, getGenerationsByUser, getLatestGeneration, deleteGeneration
 };

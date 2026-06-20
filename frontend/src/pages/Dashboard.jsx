@@ -246,7 +246,7 @@ const Dashboard = () => {
       setTrainingLogs(prev => [...prev, { type: "PROCESS", text: "Upload complete. Triggering training..." }]);
       setTrainingProgress(20);
       
-      const trainRes = await audiumApi.startTraining(uploadRes.uploadId);
+      const trainRes = await audiumApi.startTraining(uploadRes.uploadId, uploadRes.audioUrl, uploadRes.transcriptUrl);
       
       setUploadState({ loading: false, error: '', success: '' });
       setActiveJobId(trainRes.jobId);

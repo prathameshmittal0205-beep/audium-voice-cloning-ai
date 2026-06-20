@@ -62,4 +62,26 @@ router.post('/register-worker', async (req, res) => {
   }
 });
 
+router.post('/training-complete', async (req, res) => {
+  const { secret, jobId, voiceId, modelUrl } = req.body;
+
+  if (secret !== WORKER_SECRET) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  if (!jobId || !modelUrl) {
+    return res.status(400).json({ error: 'jobId and modelUrl are required' });
+  }
+
+  try {
+    const dbService = require('../services/dbService');
+    await dbService.updateVoiceModelUrl(jobId, modelUrl);
+    req.log.info({ jobId, voiceId, modelUrl }, 'Training completed successfully');
+    res.status(200).json({ status: 'ok' });
+  } catch (error) {
+    req.log.error({ error, jobId }, 'Failed to update voice readiness');
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
