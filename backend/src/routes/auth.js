@@ -13,7 +13,7 @@ const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { userId: user._id, email: user.email },
     process.env.AUDIUM_JWT_SECRET,
-    { expiresIn: '15m' } // 15 minutes access token
+    { expiresIn: '7d' } // 7 days access token
   );
   
   const refreshToken = crypto.randomBytes(40).toString('hex');

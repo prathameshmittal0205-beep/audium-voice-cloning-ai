@@ -54,33 +54,21 @@ export const audiumApi = {
     fetchWithAuth('/auth/register', { method: 'POST', body: { email, password } }),
     
   uploadVoice: async (audioFile, transcriptFile) => {
-    const newFormData = new FormData();
-    newFormData.append('audio', audioFile);
-    newFormData.append('transcript', transcriptFile);
-
     const token = localStorage.getItem('audium_token');
-    const headers = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+    formData.append('transcript', transcriptFile);
 
     const response = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
-      headers,
-      body: newFormData
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
     });
 
     if (!response.ok) {
-      let errorMsg = 'Upload failed';
-      try {
-        const data = await response.json();
-        errorMsg = data.error?.message || data.error || errorMsg;
-      } catch (e) {
-        errorMsg = `${errorMsg}: ${response.statusText}`;
-      }
-      throw new Error(errorMsg);
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || err.error || `Upload failed: ${response.status}`);
     }
-
     return response.json();
   },
     
