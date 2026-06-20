@@ -26,13 +26,13 @@ router.post('/', authenticateToken, uploadLimiter, upload.fields([
     const audioBlob = await put(
       `audio/${userId}/${uploadId}.wav`,
       audioFile.buffer,
-      { access: 'public', contentType: 'audio/wav' }
+      { access: 'private', contentType: 'audio/wav' }
     );
 
     const transcriptBlob = await put(
       `audio/${userId}/${uploadId}.txt`,
       transcriptFile.buffer,
-      { access: 'public', contentType: 'text/plain' }
+      { access: 'private', contentType: 'text/plain' }
     );
 
     res.status(202).json({
