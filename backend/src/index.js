@@ -33,9 +33,8 @@ if (process.env.NODE_ENV !== 'test') {
 const app = express();
 
 // Connect to Postgres unless in test mode
-if (process.env.NODE_ENV !== 'test') {
-  connectDB();
-}
+// connectDB() is removed because top-level async network calls in Vercel Serverless
+// functions cause "fetch failed" timeouts and crash the process.
 
 // Middleware
 app.use(cors({

@@ -22,7 +22,7 @@ async function connectDB() {
       level: 'FATAL',
       message: err.message
     }));
-    process.exit(1);
+    // Removed process.exit(1) to prevent serverless function crashes
   }
 }
 
