@@ -7,6 +7,7 @@ const { uploadLimiter } = require('../middlewares/rateLimiter');
 
 router.post('/request-url', authenticateToken, uploadLimiter, async (req, res) => {
   try {
+    console.log('BLOB TOKEN exists:', !!process.env.BLOB_READ_WRITE_TOKEN);
     const body = req.body;
     const jsonResponse = await handleUpload({
       body,

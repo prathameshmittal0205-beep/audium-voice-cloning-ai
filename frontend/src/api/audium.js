@@ -62,7 +62,7 @@ export const audiumApi = {
     const token = localStorage.getItem('audium_token');
     const requestInit = { headers: {} };
     if (token) requestInit.headers['Authorization'] = `Bearer ${token}`;
-    const handleUploadUrl = `${API_BASE}/upload/request-url`;
+    const handleUploadUrl = token ? `${API_BASE}/upload/request-url?token=${token}` : `${API_BASE}/upload/request-url`;
 
     const audioBlob = await upload(audioFile.name || 'audio.wav', audioFile, {
       access: 'public',

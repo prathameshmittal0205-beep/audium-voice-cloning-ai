@@ -3,7 +3,7 @@ const logger = require('../utils/logger');
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = (authHeader && authHeader.split(' ')[1]) || req.query.token;
   
   if (token == null) {
     logger.warn({ traceId: req.id }, 'Authentication failed: No token provided');
