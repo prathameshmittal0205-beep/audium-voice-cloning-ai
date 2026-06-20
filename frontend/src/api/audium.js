@@ -1,6 +1,10 @@
 import { upload } from '@vercel/blob/client';
 
-const API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL;
+
+if (!API_BASE) {
+  throw new Error("VITE_AUDIUM_API_BASE_URL is not defined");
+}
 
 const fetchWithAuth = async (endpoint, options = {}) => {
   const token = localStorage.getItem('audium_token');
