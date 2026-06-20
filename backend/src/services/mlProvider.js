@@ -3,7 +3,8 @@ const LocalWorkerProvider = require('./providers/localWorkerProvider');
 
 class MLProviderFactory {
   constructor() {
-    const providerType = process.env.ML_PROVIDER || 'vertex';
+    // Default to local to prevent Vertex credential errors during testing
+    const providerType = process.env.ML_PROVIDER || 'local';
     
     if (providerType === 'local') {
       this.provider = new LocalWorkerProvider();

@@ -22,7 +22,12 @@ router.post('/start', authenticateToken, trainingLimiter, async (req, res) => {
       status = result.status;
     } catch (error) {
       if (error.name === 'OfflineError') {
-        return res.status(503).json({ status: 'offline', message: error.message });
+        return res.status(503).json({
+          error: {
+            code: 'AUDIUM_WORKER_OFFLINE',
+            message: 'ML worker is not registered. Please start the local worker and register it.'
+          }
+        });
       }
       throw error;
     }
@@ -55,7 +60,12 @@ router.get('/status/:jobId', authenticateToken, async (req, res) => {
       state = result.rawState || mappedStatus;
     } catch (error) {
       if (error.name === 'OfflineError') {
-        return res.status(503).json({ status: 'offline', message: error.message });
+        return res.status(503).json({
+          error: {
+            code: 'AUDIUM_WORKER_OFFLINE',
+            message: 'ML worker is not registered. Please start the local worker and register it.'
+          }
+        });
       }
       throw error;
     }
