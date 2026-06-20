@@ -1,9 +1,13 @@
 import { upload } from '@vercel/blob/client';
 
-const API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL;
+let API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL;
 
 if (!API_BASE) {
   throw new Error("VITE_AUDIUM_API_BASE_URL is not defined");
+}
+
+if (!API_BASE.endsWith('/api')) {
+  API_BASE = `${API_BASE.replace(/\/$/, '')}/api`;
 }
 
 const fetchWithAuth = async (endpoint, options = {}) => {

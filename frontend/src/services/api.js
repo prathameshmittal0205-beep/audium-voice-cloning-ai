@@ -1,7 +1,11 @@
-const BASE_URL = import.meta.env.VITE_AUDIUM_API_BASE_URL;
+let BASE_URL = import.meta.env.VITE_AUDIUM_API_BASE_URL;
 
 if (!BASE_URL) {
   throw new Error("VITE_AUDIUM_API_BASE_URL is not defined");
+}
+
+if (!BASE_URL.endsWith('/api')) {
+  BASE_URL = `${BASE_URL.replace(/\/$/, '')}/api`;
 }
 
 let isRefreshing = false;
