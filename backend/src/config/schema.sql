@@ -43,3 +43,9 @@ CREATE TABLE IF NOT EXISTS audium_voices (
 
 CREATE INDEX IF NOT EXISTS idx_voices_user_id ON audium_voices(user_id);
 CREATE INDEX IF NOT EXISTS idx_voices_voice_id ON audium_voices(voice_id);
+
+CREATE TABLE IF NOT EXISTS audium_config (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);

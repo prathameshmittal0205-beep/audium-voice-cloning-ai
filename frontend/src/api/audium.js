@@ -36,11 +36,15 @@ const fetchWithAuth = async (endpoint, options = {}) => {
     let errorMsg = 'An error occurred';
     try {
       const data = await response.json();
-      errorMsg = data.error || errorMsg;
+      if (data.error && typeof data.error === 'object' && data.error.message) {
+        errorMsg = data.error.message;
+      } else {
+        errorMsg = data.error || errorMsg;
+      }
     } catch (e) {
       errorMsg = response.statusText;
     }
-    throw new Error(errorMsg);
+    throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
   }
 
   return response.json();

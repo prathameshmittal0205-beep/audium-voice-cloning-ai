@@ -14,7 +14,7 @@ class LocalWorkerProvider {
   }
 
   async _checkHealth() {
-    const workerUrl = workerRegistry.getWorkerUrl();
+    const workerUrl = await workerRegistry.getWorkerUrl();
     if (!workerUrl) {
       throw new OfflineError('Voice cloning engine is currently unavailable.');
     }
@@ -58,7 +58,7 @@ class LocalWorkerProvider {
 
   async startTraining({ uploadId, userId, voiceId, datasetUrl }) {
     await this._checkHealth();
-    const workerUrl = workerRegistry.getWorkerUrl();
+    const workerUrl = await workerRegistry.getWorkerUrl();
     
     try {
       const response = await fetch(`${workerUrl}/train`, {
@@ -81,7 +81,7 @@ class LocalWorkerProvider {
 
   async getTrainingStatus(jobId) {
     // We don't necessarily need to check health here, if offline we just throw or say failed/offline
-    const workerUrl = workerRegistry.getWorkerUrl();
+    const workerUrl = await workerRegistry.getWorkerUrl();
     if (!workerUrl) throw new OfflineError('Voice cloning engine is currently unavailable.');
 
     try {
@@ -118,7 +118,7 @@ class LocalWorkerProvider {
 
   async generateSpeech({ text, voiceId, userId }) {
     await this._checkHealth();
-    const workerUrl = workerRegistry.getWorkerUrl();
+    const workerUrl = await workerRegistry.getWorkerUrl();
 
     try {
       const response = await fetch(`${workerUrl}/generate`, {

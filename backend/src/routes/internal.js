@@ -32,7 +32,7 @@ function isValidWorkerUrl(url) {
   }
 }
 
-router.post('/register-worker', (req, res) => {
+router.post('/register-worker', async (req, res) => {
   const { workerUrl, secret } = req.body;
 
   if (secret !== WORKER_SECRET) {
@@ -52,10 +52,14 @@ router.post('/register-worker', (req, res) => {
     });
   }
 
-  workerRegistry.setWorkerUrl(workerUrl);
-  req.log.info({ workerUrl }, 'Local ML Worker registered successfully');
-
-  res.status(200).json({ status: 'success', message: 'Worker registered' });
+  try {
+    await workerRegistry.setWorkerUrl(workerUrl);
+    req.log.info({ workerUrl }, 'Local ML Worker registered successfully');
+    res.status(200).json({ status: 'success', message: 'Worker registered' });
+  } catch (error) {
+    req.log.error({ error }, 'Failed to persist worker URL');
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router;
