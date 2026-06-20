@@ -1,4 +1,3 @@
-import { upload } from '@vercel/blob/client';
 
 let API_BASE = import.meta.env.VITE_AUDIUM_API_BASE_URL;
 
@@ -54,35 +53,35 @@ export const audiumApi = {
   register: (email, password) => 
     fetchWithAuth('/auth/register', { method: 'POST', body: { email, password } }),
     
-  uploadVoice: async (formData) => {
-    const audioFile = formData.get('audio');
-    const transcriptText = formData.get('transcript');
-    const transcriptFile = new File([transcriptText], 'transcript.txt', { type: 'text/plain' });
+  uploadVoice: async (audioFile, transcriptFile) => {
+    const newFormData = new FormData();
+    newFormData.append('audio', audioFile);
+    newFormData.append('transcript', transcriptFile);
 
     const token = localStorage.getItem('audium_token');
-    const requestInit = { headers: {} };
-    if (token) requestInit.headers['Authorization'] = `Bearer ${token}`;
-    const handleUploadUrl = token ? `${API_BASE}/upload/request-url?token=${token}` : `${API_BASE}/upload/request-url`;
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
-    const audioBlob = await upload(audioFile.name || 'audio.wav', audioFile, {
-      access: 'public',
-      handleUploadUrl,
-      requestInit
-    });
-
-    const transcriptBlob = await upload(transcriptFile.name, transcriptFile, {
-      access: 'public',
-      handleUploadUrl,
-      requestInit
-    });
-
-    return fetchWithAuth('/upload/complete', {
+    const response = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
-      body: {
-        audioBlobUrl: audioBlob.url,
-        transcriptBlobUrl: transcriptBlob.url
-      }
+      headers,
+      body: newFormData
     });
+
+    if (!response.ok) {
+      let errorMsg = 'Upload failed';
+      try {
+        const data = await response.json();
+        errorMsg = data.error?.message || data.error || errorMsg;
+      } catch (e) {
+        errorMsg = `${errorMsg}: ${response.statusText}`;
+      }
+      throw new Error(errorMsg);
+    }
+
+    return response.json();
   },
     
   startTraining: (uploadId) => 

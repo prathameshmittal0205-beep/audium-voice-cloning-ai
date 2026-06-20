@@ -225,12 +225,10 @@ const Dashboard = () => {
     setTrainingProgress(10); // Start phase 1 upload
     
     try {
-      const formData = new FormData();
-      formData.append('audio', audioFile);
-      formData.append('transcript', transcript);
+      const transcriptFile = new File([transcript], 'transcript.txt', { type: 'text/plain' });
 
       setTrainingLogs([{ type: "PROCESS", text: "Uploading audio..." }]);
-      const uploadRes = await audiumApi.uploadVoice(formData);
+      const uploadRes = await audiumApi.uploadVoice(audioFile, transcriptFile);
       
       setTrainingLogs(prev => [...prev, { type: "PROCESS", text: "Upload complete. Triggering training..." }]);
       setTrainingProgress(20);
