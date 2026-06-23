@@ -56,7 +56,7 @@ router.post('/generate', authenticateToken, ttsLimiter, async (req, res) => {
       audioBuffer,
       `generations/${userId}/${generationId}.wav`,
       'audio/wav',
-      'public'
+      'private'
     );
 
     // Update DB with real path
