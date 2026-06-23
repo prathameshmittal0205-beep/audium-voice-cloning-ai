@@ -28,9 +28,6 @@ const Landing = () => {
         </div>
 
         <div className="animate-slide-up" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '2rem' }}>
-          <div className="logo-container audium-logo" style={{ width: '60px' }}>
-            <img src="/logo.png" alt="Audium Logo" style={{ width: '100%', height: 'auto', maxHeight: '36px' }} />
-          </div>
           <div className="logo-text heading-serif" style={{ fontSize: '1.5rem', margin: 0 }}>
             Audium
           </div>

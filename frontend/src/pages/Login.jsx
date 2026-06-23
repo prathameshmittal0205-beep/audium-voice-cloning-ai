@@ -39,9 +39,7 @@ const Login = () => {
           </svg>
         </div>
         <div className="animate-slide-up stagger-1" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginBottom: '28px', position: 'relative', zIndex: 1 }}>
-          <div className="logo-container audium-logo" style={{ width: '80px', position: 'relative' }}>
-            <img src="/logo.png" alt="Audium Logo" style={{ width: '100%', height: 'auto', maxHeight: '48px' }} />
-          </div>
+
           <div className="logo-text heading-serif" style={{ fontSize: '2rem', margin: 0 }}>
             Audium
           </div>

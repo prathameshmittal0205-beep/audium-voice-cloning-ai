@@ -335,9 +335,7 @@ const Dashboard = () => {
       <header className="nav-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="logo-container audium-logo" style={{ width: '56px', display: 'flex', alignItems: 'center', position: 'relative' }}>
-              <img src="/logo.png" alt="Audium Logo" style={{ width: '100%', height: 'auto', maxHeight: '28px' }} />
-            </div>
+
             <div className="logo-text heading-serif hide-on-mobile" style={{ fontSize: '1.25rem', margin: 0 }}>
               Audium
             </div>
