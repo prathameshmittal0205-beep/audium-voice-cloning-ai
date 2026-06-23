@@ -126,8 +126,8 @@ class VertexProvider {
       instances: [
         {
           text,
-          voiceId,
-          userId,
+          voice_id: voiceId,
+          user_id: userId,
           language: "en"
         }
       ]
