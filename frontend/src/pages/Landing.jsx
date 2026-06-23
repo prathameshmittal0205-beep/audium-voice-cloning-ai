@@ -21,7 +21,7 @@ const Landing = () => {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', minHeight: '70vh' }}>
         
         {/* Animated Background Sine Wave */}
-        <div className="empty-state-wave" style={{ opacity: 0.08, zIndex: -1 }}>
+        <div className="empty-state-wave" style={{ opacity: 0.08, zIndex: -1, width: '100vw', left: '50%', transform: 'translateX(-50%)' }}>
           <svg viewBox="0 0 400 100" preserveAspectRatio="none">
             <path d="M0,50 Q50,0 100,50 T200,50 T300,50 T400,50" fill="none" stroke="var(--glow-cyan)" strokeWidth="1.5" />
           </svg>
