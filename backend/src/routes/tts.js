@@ -52,11 +52,10 @@ router.post('/generate', authenticateToken, ttsLimiter, async (req, res) => {
     const generationId = generation._id;
     
     // Upload buffer to Vercel Blob
-    const audioBlobUrl = await blobService.uploadBuffer(
+    const audioBlobUrl = await blobService.uploadPublicBuffer(
       audioBuffer,
       `generations/${userId}/${generationId}.wav`,
-      'audio/wav',
-      'private'
+      'audio/wav'
     );
 
     // Update DB with real path
