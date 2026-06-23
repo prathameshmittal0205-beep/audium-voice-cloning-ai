@@ -2,7 +2,7 @@ const { put, del, head } = require('@vercel/blob');
 
 async function uploadBuffer(buffer, filename, contentType) {
   const blob = await put(filename, buffer, {
-    access: 'public',
+    access: 'private',
     contentType,
     addRandomSuffix: true
   });
